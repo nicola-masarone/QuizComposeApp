@@ -1,2 +1,2 @@
 # QuizComposeApp
-Quiz app for android
+Quiz app for Android (UI based on Jetpack Compose)
