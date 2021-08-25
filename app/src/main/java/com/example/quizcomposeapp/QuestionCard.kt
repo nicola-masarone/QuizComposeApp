@@ -1,31 +1,30 @@
 package com.example.quizcomposeapp
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
+import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
-import coil.decode.SvgDecoder
-import coil.request.ImageRequest
 
 @Composable
 fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String) -> Unit = {"destination"}) {
     val pts: Int by myViewModel.points.observeAsState(0)
     val questionInd: Int by myViewModel.questionIndex.observeAsState(0)
     val myOptions: List<String> by myViewModel.options.observeAsState(listOf())
+    val myWrongAnswer: Boolean by myViewModel.wrongAnswer.observeAsState(false)
 
     QuestionCard(
         imageUrl = myViewModel.myQuestions[questionInd].picUrl,
@@ -33,8 +32,17 @@ fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String)
         optionOk = myViewModel.myQuestions[questionInd].name,
         question = "A quale nazione appartiene la bandiera in figura?\nRisposte esatte: $pts",
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
-        skipQuestion = { myViewModel.nextQuestion() }
+        nextQuestion = { myViewModel.nextQuestion() },
+        skipQuestion = { myViewModel.nextQuestion() },
+        setWrongAnswer = { myViewModel.setWrongAnswer() }
     )
+
+    if (myWrongAnswer) {
+        ErrorDialog(
+            resetWrongAnswer = { myViewModel.resetWrongAnswer() },
+            correctAnswer = myViewModel.myQuestions[questionInd].name
+        )
+    }
 }
 
 @Preview
@@ -45,7 +53,9 @@ fun QuestionCard (
     optionOk: String = options[0],
     question: String = "A quale nazione appartiene la bandiera rappresentata nell'immagine?",
     changePoints: (Int) -> Unit = { },
-    skipQuestion: () -> Unit = { }
+    nextQuestion: () -> Unit = { },
+    skipQuestion: () -> Unit = { },
+    setWrongAnswer: () -> Unit = { }
 ) {
     val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
 
@@ -111,14 +121,40 @@ fun QuestionCard (
             ) { Text("Salta") }
             Button(
                 onClick = {
-                    if (selectedOption == optionOk) { changePoints(1) }
-                    else { changePoints(-1) }
+                    if (selectedOption == optionOk) {
+                        changePoints(1)
+                        nextQuestion()
+                    }
+                    else {
+                        setWrongAnswer()
+                        changePoints(-1)
+                        //nextQuestion()
+                    }
                     onOptionSelected("")
                 },
                 modifier = Modifier
                     .weight(1F)
                     .padding(horizontal = 8.dp, vertical = 16.dp)
             ) { Text("Rispondi") }
+        }
+    }
+
+}
+
+@Preview
+@Composable
+fun ErrorDialog(
+    resetWrongAnswer: () -> Unit = { },
+    correctAnswer: String = "Italia"
+) {
+    Dialog(onDismissRequest = resetWrongAnswer) {
+        // Draw a rectangle shape with rounded corners inside the dialog
+        Box(Modifier.clip(RoundedCornerShape(6.dp)).background(Color.White)
+        ) {
+            Text(
+                "La risposta corretta era:\n$correctAnswer",
+                Modifier.padding(6.dp)
+            )
         }
     }
 

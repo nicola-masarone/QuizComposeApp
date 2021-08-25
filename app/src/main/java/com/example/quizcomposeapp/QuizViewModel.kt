@@ -15,19 +15,27 @@ import kotlin.random.Random
 class QuizViewModel: ViewModel() {
     // LiveData holds state which is observed by the UI
     // (state flows down from ViewModel)
+    private val _wrongAnswer = MutableLiveData(false)
+    val wrongAnswer: LiveData<Boolean> = _wrongAnswer
+    fun resetWrongAnswer() {
+        _wrongAnswer.value = false
+        nextQuestion()
+    }
+    fun setWrongAnswer() {
+        _wrongAnswer.value = true
+    }
+
     private val _points = MutableLiveData(0)
     val points: LiveData<Int> = _points
-
     // updateCount is an event we're defining that the UI can invoke
     // (events flow up from UI)
     fun updatePoints(newPts: Int) {
         _points.value = newPts
-        nextQuestion()
+        //nextQuestion()
     }
 
     private val _questionIndex = MutableLiveData(0)
     val questionIndex: LiveData<Int> = _questionIndex
-
     fun nextQuestion() {
         _questionIndex.value = (_questionIndex.value?.plus(1))?.rem(myQuestions.size)
         _options.value = buildOptions()
