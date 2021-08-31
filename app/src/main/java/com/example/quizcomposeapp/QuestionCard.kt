@@ -7,8 +7,14 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +31,8 @@ fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String)
     val questionInd: Int by myViewModel.questionIndex.observeAsState(0)
     val myOptions: List<String> by myViewModel.options.observeAsState(listOf())
     val myWrongAnswer: Boolean by myViewModel.wrongAnswer.observeAsState(false)
+    val myGoodAnswer: Boolean by myViewModel.goodAnswer.observeAsState(false)
+
 
     QuestionCard(
         imageUrl = myViewModel.myQuestions[questionInd].picUrl,
@@ -34,7 +42,8 @@ fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String)
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
         nextQuestion = { myViewModel.nextQuestion() },
         skipQuestion = { myViewModel.nextQuestion() },
-        setWrongAnswer = { myViewModel.setWrongAnswer() }
+        setWrongAnswer = { myViewModel.setWrongAnswer() },
+        setGoodAnswer =  { myViewModel.setGoodAnswer() }
     )
 
     if (myWrongAnswer) {
@@ -43,6 +52,14 @@ fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String)
             correctAnswer = myViewModel.myQuestions[questionInd].name
         )
     }
+
+    if (myGoodAnswer) {
+        OkDialog(
+            resetGoodAnswer = { myViewModel.resetGoodAnswer() },
+            comment = "Risposta corretta!"
+        )
+    }
+
 }
 
 @Preview
@@ -55,7 +72,8 @@ fun QuestionCard (
     changePoints: (Int) -> Unit = { },
     nextQuestion: () -> Unit = { },
     skipQuestion: () -> Unit = { },
-    setWrongAnswer: () -> Unit = { }
+    setWrongAnswer: () -> Unit = { },
+    setGoodAnswer:  () -> Unit = { }
 ) {
     val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
 
@@ -122,13 +140,13 @@ fun QuestionCard (
             Button(
                 onClick = {
                     if (selectedOption == optionOk) {
+                        setGoodAnswer()
                         changePoints(1)
-                        nextQuestion()
+                        //nextQuestion()
                     }
                     else {
                         setWrongAnswer()
                         changePoints(-1)
-                        //nextQuestion()
                     }
                     onOptionSelected("")
                 },
@@ -149,13 +167,42 @@ fun ErrorDialog(
 ) {
     Dialog(onDismissRequest = resetWrongAnswer) {
         // Draw a rectangle shape with rounded corners inside the dialog
-        Box(Modifier.clip(RoundedCornerShape(6.dp)).background(Color.White)
+        Box(
+            Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.White)
         ) {
-            Text(
-                "La risposta corretta era:\n$correctAnswer",
-                Modifier.padding(6.dp)
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Filled.Error, contentDescription = "Localized description")
+                Text(
+                    "La risposta corretta era:\n$correctAnswer",
+                    Modifier.padding(6.dp)
+                )
+            }
         }
     }
+}
 
+@Preview
+@Composable
+fun OkDialog(
+    resetGoodAnswer: () -> Unit = { },
+    comment: String = "Ben fatto!"
+) {
+    Dialog(onDismissRequest = resetGoodAnswer) {
+        // Draw a rectangle shape with rounded corners inside the dialog
+        Box(
+            Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.White)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Filled.ThumbUp, contentDescription = "Localized description")
+                Text(
+                    "Risposta esatta!",
+                    Modifier.padding(6.dp)
+                )
+            }
+        }
+    }
 }

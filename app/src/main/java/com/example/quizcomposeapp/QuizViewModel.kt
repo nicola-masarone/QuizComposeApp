@@ -25,13 +25,21 @@ class QuizViewModel: ViewModel() {
         _wrongAnswer.value = true
     }
 
+    private val _goodAnswer = MutableLiveData(false)
+    val goodAnswer: LiveData<Boolean> = _goodAnswer
+    fun resetGoodAnswer() {
+        _goodAnswer.value = false
+        nextQuestion()
+    }
+    fun setGoodAnswer() {
+        _goodAnswer.value = true
+    }
+
+
     private val _points = MutableLiveData(0)
     val points: LiveData<Int> = _points
-    // updateCount is an event we're defining that the UI can invoke
-    // (events flow up from UI)
     fun updatePoints(newPts: Int) {
         _points.value = newPts
-        //nextQuestion()
     }
 
     private val _questionIndex = MutableLiveData(0)
