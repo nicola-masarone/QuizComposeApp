@@ -43,7 +43,6 @@ fun ShowQuestionCard(
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
         skipQuestion = { myViewModel.nextQuestion() },
         dialog,
-
         setOption = { option -> myViewModel.setSelOption(option) },
         selOption = selectedOption
     )
@@ -51,7 +50,8 @@ fun ShowQuestionCard(
     if (dialogVisibility)
         ShowDialog(
             dialog,
-            { myViewModel.nextQuestion() }
+            { myViewModel.nextQuestion() },
+            { text -> myViewModel.setSelOption(text) }
         )
 }
 
@@ -143,7 +143,6 @@ fun QuestionCard (
                         dialog.setVisibility(true)
                         changePoints(-1)
                     }
-                    setOption("")
                 },
                 modifier = Modifier
                     .weight(1F)
@@ -158,11 +157,13 @@ fun QuestionCard (
 @Composable
 fun ShowDialog(
     dialog: DialogViewModel,
-    nextQuestion: () -> Unit
+    nextQuestion: () -> Unit,
+    setOption: (String) -> Unit
 ) {
     Dialog(onDismissRequest = {
         dialog.setVisibility(false)
         nextQuestion()
+        setOption("")
     }) {
         Box(
             Modifier
