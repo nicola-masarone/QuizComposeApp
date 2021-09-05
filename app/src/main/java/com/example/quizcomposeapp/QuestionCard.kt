@@ -2,6 +2,7 @@ package com.example.quizcomposeapp
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -71,6 +72,7 @@ fun QuestionCard (
                 painter = rememberImagePainter(imageUrl),
                 contentDescription = "Quiz image",
                 modifier = Modifier
+                    .border(1.dp, Color.Black).padding(1.dp)
                     .weight(1F)
                     .align(Alignment.CenterVertically)
             )
