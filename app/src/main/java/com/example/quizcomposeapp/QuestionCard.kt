@@ -14,8 +14,6 @@ import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +33,7 @@ fun ShowQuestionCard(
     val questionInd: Int by myViewModel.questionIndex.observeAsState(0)
     val myOptions: List<String> by myViewModel.options.observeAsState(listOf())
     val dialogVisibility: Boolean by dialog.visibility.observeAsState(false)
+    val selectedOption:String by myViewModel.selOption.observeAsState("")
 
     QuestionCard(
         imageUrl = myViewModel.myQuestions[questionInd].picUrl,
@@ -43,7 +42,10 @@ fun ShowQuestionCard(
         question = "A quale nazione appartiene la bandiera in figura?\nRisposte esatte: $pts",
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
         skipQuestion = { myViewModel.nextQuestion() },
-        dialog
+        dialog,
+
+        setOption = { option -> myViewModel.setSelOption(option) },
+        selOption = selectedOption
     )
 
     if (dialogVisibility)
@@ -61,9 +63,10 @@ fun QuestionCard (
     question: String,
     changePoints: (Int) -> Unit,
     skipQuestion: () -> Unit,
-    dialog: DialogViewModel
+    dialog: DialogViewModel,
+    setOption: (String) -> Unit,
+    selOption: String
 ) {
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
 
     Column {
         Row(modifier = Modifier.padding(8.dp)) {
@@ -88,15 +91,15 @@ fun QuestionCard (
                         Modifier
                             .fillMaxWidth()
                             .selectable(
-                                selected = (text == selectedOption),
-                                onClick = { onOptionSelected(text) },
+                                selected = (text == selOption),
+                                onClick = { setOption(text) },
                                 role = Role.RadioButton
                             )
                             .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = (text == selectedOption),
+                            selected = (text == selOption),
                             onClick = null // null recommended for accessibility with screenreaders
                         )
                         Text(
@@ -119,7 +122,7 @@ fun QuestionCard (
         Row {
             Button(
                 onClick = {
-                    onOptionSelected("")
+                    setOption("")
                     skipQuestion()
                 },
                 modifier = Modifier
@@ -128,7 +131,7 @@ fun QuestionCard (
             ) { Text("Salta") }
             Button(
                 onClick = {
-                    if (selectedOption == optionOk) {
+                    if (selOption == optionOk) {
                         dialog.setText("Risposta esatta!")
                         dialog.setIcon(Icons.Filled.ThumbUp)
                         dialog.setVisibility(true)
@@ -140,7 +143,7 @@ fun QuestionCard (
                         dialog.setVisibility(true)
                         changePoints(-1)
                     }
-                    onOptionSelected("")
+                    setOption("")
                 },
                 modifier = Modifier
                     .weight(1F)

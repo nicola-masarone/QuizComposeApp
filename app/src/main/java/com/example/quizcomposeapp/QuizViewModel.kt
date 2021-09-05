@@ -27,6 +27,14 @@ class QuizViewModel: ViewModel() {
         _options.value = buildOptions()
     }
 
+    // Test for option LiveData
+    private val _selOption = MutableLiveData("")
+    val selOption: LiveData<String> = _selOption
+    fun setSelOption(option: String) {
+        _selOption.value = option
+    }
+    // Test for option LiveData
+
     private val _options = MutableLiveData<List<String>>()
     val options: LiveData<List<String>> = _options
     private var optionsNum = 4  // Alternative options for each question
