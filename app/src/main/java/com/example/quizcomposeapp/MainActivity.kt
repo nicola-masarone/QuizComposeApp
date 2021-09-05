@@ -18,11 +18,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val myViewModel: QuizViewModel by viewModels()
+        val dialogViewModel: DialogViewModel by viewModels()
+
         setContent {
             QuizComposeAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MyApp(myViewModel)
+                    MyApp(
+                        myViewModel,
+                        dialogViewModel
+                    )
                 }
             }
         }
@@ -30,12 +35,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(myViewModel: QuizViewModel) {
+fun MyApp(
+    myViewModel: QuizViewModel,
+    dialogViewModel: DialogViewModel
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "selectSubject") {
         composable(route = "selectSubject") { SelectSubject(myViewModel) { destination -> navController.navigate(destination) } }
-        composable(route = "showQuestionCard") { ShowQuestionCard(myViewModel) { destination -> navController.navigate(destination) } }
+        composable(route = "showQuestionCard") { ShowQuestionCard(myViewModel, dialogViewModel) { destination -> navController.navigate(destination) } }
     }
 }
 

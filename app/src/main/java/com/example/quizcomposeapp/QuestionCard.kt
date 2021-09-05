@@ -20,19 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
 
 @Composable
-fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String) -> Unit = {"destination"}) {
+fun ShowQuestionCard(
+    myViewModel: QuizViewModel,
+    dialog: DialogViewModel,
+    navigateToDestination: (String) -> Unit = {"destination"}
+) {
     val pts: Int by myViewModel.points.observeAsState(0)
     val questionInd: Int by myViewModel.questionIndex.observeAsState(0)
     val myOptions: List<String> by myViewModel.options.observeAsState(listOf())
-    val myWrongAnswer: Boolean by myViewModel.wrongAnswer.observeAsState(false)
-    val myGoodAnswer: Boolean by myViewModel.goodAnswer.observeAsState(false)
-
+    val dialogVisibility: Boolean by dialog.visibility.observeAsState(false)
 
     QuestionCard(
         imageUrl = myViewModel.myQuestions[questionInd].picUrl,
@@ -40,40 +41,26 @@ fun ShowQuestionCard(myViewModel: QuizViewModel, navigateToDestination: (String)
         optionOk = myViewModel.myQuestions[questionInd].name,
         question = "A quale nazione appartiene la bandiera in figura?\nRisposte esatte: $pts",
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
-        nextQuestion = { myViewModel.nextQuestion() },
         skipQuestion = { myViewModel.nextQuestion() },
-        setWrongAnswer = { myViewModel.setWrongAnswer() },
-        setGoodAnswer =  { myViewModel.setGoodAnswer() }
+        dialog
     )
 
-    if (myWrongAnswer) {
-        ErrorDialog(
-            resetWrongAnswer = { myViewModel.resetWrongAnswer() },
-            correctAnswer = myViewModel.myQuestions[questionInd].name
+    if (dialogVisibility)
+        ShowDialog(
+            dialog,
+            { myViewModel.nextQuestion() }
         )
-    }
-
-    if (myGoodAnswer) {
-        OkDialog(
-            resetGoodAnswer = { myViewModel.resetGoodAnswer() },
-            comment = "Risposta corretta!"
-        )
-    }
-
 }
 
-@Preview
 @Composable
 fun QuestionCard (
-    imageUrl: String = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Flag_of_Italy.svg/150px-Flag_of_Italy.svg.png",
-    options: List<String> = listOf("Italia", "Francia", "Spagna", "Germania", "Regno Unito"),
-    optionOk: String = options[0],
-    question: String = "A quale nazione appartiene la bandiera rappresentata nell'immagine?",
-    changePoints: (Int) -> Unit = { },
-    nextQuestion: () -> Unit = { },
-    skipQuestion: () -> Unit = { },
-    setWrongAnswer: () -> Unit = { },
-    setGoodAnswer:  () -> Unit = { }
+    imageUrl: String,
+    options: List<String>,
+    optionOk: String,
+    question: String,
+    changePoints: (Int) -> Unit,
+    skipQuestion: () -> Unit,
+    dialog: DialogViewModel
 ) {
     val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
 
@@ -140,12 +127,15 @@ fun QuestionCard (
             Button(
                 onClick = {
                     if (selectedOption == optionOk) {
-                        setGoodAnswer()
+                        dialog.setText("Risposta esatta!")
+                        dialog.setIcon(Icons.Filled.ThumbUp)
+                        dialog.setVisibility(true)
                         changePoints(1)
-                        //nextQuestion()
                     }
                     else {
-                        setWrongAnswer()
+                        dialog.setText("Errore!\nLa risposta corretta era:\n$optionOk")
+                        dialog.setIcon(Icons.Filled.Error)
+                        dialog.setVisibility(true)
                         changePoints(-1)
                     }
                     onOptionSelected("")
@@ -159,23 +149,25 @@ fun QuestionCard (
 
 }
 
-@Preview
+
 @Composable
-fun ErrorDialog(
-    resetWrongAnswer: () -> Unit = { },
-    correctAnswer: String = "Italia"
+fun ShowDialog(
+    dialog: DialogViewModel,
+    nextQuestion: () -> Unit
 ) {
-    Dialog(onDismissRequest = resetWrongAnswer) {
-        // Draw a rectangle shape with rounded corners inside the dialog
+    Dialog(onDismissRequest = {
+        dialog.setVisibility(false)
+        nextQuestion()
+    }) {
         Box(
             Modifier
                 .clip(RoundedCornerShape(6.dp))
                 .background(Color.White)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Filled.Error, contentDescription = "Localized description")
+                Icon(dialog.icon.value!!, contentDescription = "Localized description")
                 Text(
-                    "La risposta corretta era:\n$correctAnswer",
+                    dialog.text.value!!,
                     Modifier.padding(6.dp)
                 )
             }
@@ -183,26 +175,3 @@ fun ErrorDialog(
     }
 }
 
-@Preview
-@Composable
-fun OkDialog(
-    resetGoodAnswer: () -> Unit = { },
-    comment: String = "Ben fatto!"
-) {
-    Dialog(onDismissRequest = resetGoodAnswer) {
-        // Draw a rectangle shape with rounded corners inside the dialog
-        Box(
-            Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(Color.White)
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Filled.ThumbUp, contentDescription = "Localized description")
-                Text(
-                    "Risposta esatta!",
-                    Modifier.padding(6.dp)
-                )
-            }
-        }
-    }
-}

@@ -13,28 +13,6 @@ import org.jsoup.select.Elements
 import kotlin.random.Random
 
 class QuizViewModel: ViewModel() {
-    // LiveData holds state which is observed by the UI
-    // (state flows down from ViewModel)
-    private val _wrongAnswer = MutableLiveData(false)
-    val wrongAnswer: LiveData<Boolean> = _wrongAnswer
-    fun resetWrongAnswer() {
-        _wrongAnswer.value = false
-        nextQuestion()
-    }
-    fun setWrongAnswer() {
-        _wrongAnswer.value = true
-    }
-
-    private val _goodAnswer = MutableLiveData(false)
-    val goodAnswer: LiveData<Boolean> = _goodAnswer
-    fun resetGoodAnswer() {
-        _goodAnswer.value = false
-        nextQuestion()
-    }
-    fun setGoodAnswer() {
-        _goodAnswer.value = true
-    }
-
 
     private val _points = MutableLiveData(0)
     val points: LiveData<Int> = _points
