@@ -130,6 +130,7 @@ fun QuestionCard (
                     .padding(horizontal = 8.dp, vertical = 16.dp)
             ) { Text("Salta") }
             Button(
+                enabled = !selOption.equals(""),
                 onClick = {
                     if (selOption == optionOk) {
                         dialog.setText("Risposta esatta!")
