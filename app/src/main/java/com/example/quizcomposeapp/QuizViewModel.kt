@@ -95,16 +95,7 @@ class QuizViewModel: ViewModel() {
                     }
                     myQuestions.add(MyQuestion(url, name))
                 }
-/*
-                val flags: Elements = doc.select("img")
-                for (flag in flags) {
-                    myQuestions.add(MyQuestion(
-                        picUrl = "https:" + flag.attr("src").toString().replace("/200px", "/800px"),
-//                        picUrl = flag.attr("src"),
-                        name = flag.attr("alt").toString().replace("Flag of ", "").replace(".svg", "")
-                    ))
-                }
-*/
+
                 myQuestions =
                     myQuestions.dropLast(1) as MutableList<QuizViewModel.MyQuestion> // fake data for last 1 item
                 myQuestions.shuffle()
