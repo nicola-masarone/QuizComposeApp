@@ -71,6 +71,31 @@ class QuizViewModel: ViewModel() {
             withContext(Dispatchers.IO) {
                 // Blocking network request code
                 doc = Jsoup.connect(url).get()
+
+                val altFlags: Elements = doc.select("td:has(a.image)")
+                for (altFlag in altFlags) {
+                    var childCounter = 0
+                    var url: String = ""
+                    var name: String = ""
+                    for (myChild in altFlag.children()) {
+                        when (childCounter) {
+                            0 -> {
+                                url = if (myChild.childNode(0).childNodeSize() == 0) {
+                                    "https:" + myChild.childNode(0).attr("src").toString()
+                                        .replace("/200px", "/800px")
+                                } else {
+                                    "https:" + myChild.childNode(0).childNode(0).attr("src").toString()
+                                        .replace("/200px", "/800px")
+                                }
+                            }
+                            2 -> name = myChild.text()
+                            3 -> name = name + " (" + myChild.text() + ")"
+                        }
+                        childCounter++
+                    }
+                    myQuestions.add(MyQuestion(url, name))
+                }
+/*
                 val flags: Elements = doc.select("img")
                 for (flag in flags) {
                     myQuestions.add(MyQuestion(
@@ -79,9 +104,9 @@ class QuizViewModel: ViewModel() {
                         name = flag.attr("alt").toString().replace("Flag of ", "").replace(".svg", "")
                     ))
                 }
-
+*/
                 myQuestions =
-                    myQuestions.dropLast(5) as MutableList<QuizViewModel.MyQuestion> // fake data for last 3 items
+                    myQuestions.dropLast(1) as MutableList<QuizViewModel.MyQuestion> // fake data for last 1 item
                 myQuestions.shuffle()
                 _downLoadCompleted.postValue(true)
                 _downloadText.postValue("Downloading completed!")
