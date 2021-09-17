@@ -23,14 +23,14 @@ fun SelectSubject( myViewModel: QuizViewModel = QuizViewModel(), navigateToDesti
             enabled = !downLoadCompleted,
             onClick = { myViewModel.download() }
         ) {
-            Text(text = "Download data")
+            Text(text = "Scarica i dati")
         }
 
         Button(
             enabled = downLoadCompleted,
             onClick = { navigateToDestination("showQuestionCard") }
         ) {
-            Text(text = "Navigate to <<Question Card>>")
+            Text(text = "Vai al quiz")
         }
     }
 }

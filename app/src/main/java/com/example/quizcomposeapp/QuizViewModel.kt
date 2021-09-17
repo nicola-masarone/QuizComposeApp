@@ -59,19 +59,30 @@ class QuizViewModel: ViewModel() {
     private val _downloadText = MutableLiveData("Download page")
     val downloadText: LiveData<String> = _downloadText
 
+    enum class QuizSubject {
+        FLAGS, DOGS
+    }
+    private val _selectedSubject = MutableLiveData(QuizSubject.FLAGS)
+    val selectedSubject : LiveData<QuizSubject> = _selectedSubject
+
+
     fun download(
         url: String = "https://it.wikipedia.org/wiki/Lista_di_bandiere_nazionali"
     ) {
         _downloadText.value = "Downloading data..."
         _downLoadCompleted.value = false
 
-        lateinit var doc: Document
+        //lateinit var doc: Document
 
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.IO) {
                 // Blocking network request code
-                doc = Jsoup.connect(url).get()
 
+                // new function for data download
+                myQuestions = dataDownload(selectedSubject.value!!, myQuestions)
+
+/*
+                doc = Jsoup.connect(url).get()
                 val altFlags: Elements = doc.select("td:has(a.image)")
                 for (altFlag in altFlags) {
                     var childCounter = 0
@@ -95,10 +106,12 @@ class QuizViewModel: ViewModel() {
                     }
                     myQuestions.add(MyQuestion(url, name))
                 }
-
                 myQuestions =
                     myQuestions.dropLast(1) as MutableList<QuizViewModel.MyQuestion> // fake data for last 1 item
                 myQuestions.shuffle()
+*/
+
+
                 _downLoadCompleted.postValue(true)
                 _downloadText.postValue("Downloading completed!")
 
