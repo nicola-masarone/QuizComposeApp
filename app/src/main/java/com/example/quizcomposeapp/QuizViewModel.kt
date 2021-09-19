@@ -56,7 +56,7 @@ class QuizViewModel: ViewModel() {
     private val _downLoadCompleted = MutableLiveData(false)
     val downLoadCompleted: LiveData<Boolean> = _downLoadCompleted
 
-    private val _downloadText = MutableLiveData("Download page")
+    private val _downloadText = MutableLiveData("Pagina di download")
     val downloadText: LiveData<String> = _downloadText
 
     enum class QuizSubject {
@@ -64,57 +64,22 @@ class QuizViewModel: ViewModel() {
     }
     private val _selectedSubject = MutableLiveData(QuizSubject.FLAGS)
     val selectedSubject : LiveData<QuizSubject> = _selectedSubject
+    fun setSelectedSubject (subject: QuizSubject) {
+        _selectedSubject.value = subject
+    }
 
-
-    fun download(
-        url: String = "https://it.wikipedia.org/wiki/Lista_di_bandiere_nazionali"
-    ) {
-        _downloadText.value = "Downloading data..."
+    fun download() {
+        _downloadText.value = "Download dei dati..."
         _downLoadCompleted.value = false
 
-        //lateinit var doc: Document
+        myQuestions.clear()
 
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.IO) {
                 // Blocking network request code
-
-                // new function for data download
                 myQuestions = dataDownload(selectedSubject.value!!, myQuestions)
-
-/*
-                doc = Jsoup.connect(url).get()
-                val altFlags: Elements = doc.select("td:has(a.image)")
-                for (altFlag in altFlags) {
-                    var childCounter = 0
-                    var url: String = ""
-                    var name: String = ""
-                    for (myChild in altFlag.children()) {
-                        when (childCounter) {
-                            0 -> {
-                                url = if (myChild.childNode(0).childNodeSize() == 0) {
-                                    "https:" + myChild.childNode(0).attr("src").toString()
-                                        .replace("/200px", "/800px")
-                                } else {
-                                    "https:" + myChild.childNode(0).childNode(0).attr("src").toString()
-                                        .replace("/200px", "/800px")
-                                }
-                            }
-                            2 -> name = myChild.text()
-                            3 -> name = name + " (" + myChild.text() + ")"
-                        }
-                        childCounter++
-                    }
-                    myQuestions.add(MyQuestion(url, name))
-                }
-                myQuestions =
-                    myQuestions.dropLast(1) as MutableList<QuizViewModel.MyQuestion> // fake data for last 1 item
-                myQuestions.shuffle()
-*/
-
-
                 _downLoadCompleted.postValue(true)
-                _downloadText.postValue("Downloading completed!")
-
+                _downloadText.postValue("Download completato!")
                 _options.postValue(buildOptions())
             }
         }
