@@ -39,7 +39,11 @@ fun ShowQuestionCard(
         imageUrl = myViewModel.myQuestions[questionInd].picUrl,
         options = myOptions,
         optionOk = myViewModel.myQuestions[questionInd].name,
-        question = "A quale nazione appartiene la bandiera in figura?\nRisposte esatte: $pts",
+        question = when(myViewModel.selectedSubject.value) {
+            QuizViewModel.QuizSubject.FLAGS -> "A quale nazione appartiene la bandiera in figura?\nRisposte esatte: $pts"
+            QuizViewModel.QuizSubject.DOGS -> "A quale razza appartiene il cane in figura?\nRisposte esatte: $pts"
+            else -> ""
+        },
         changePoints = { newPts -> myViewModel.updatePoints(pts + newPts)},
         skipQuestion = { myViewModel.nextQuestion() },
         dialog,
@@ -54,6 +58,7 @@ fun ShowQuestionCard(
             { text -> myViewModel.setSelOption(text) }
         )
 }
+
 
 @Composable
 fun QuestionCard (
