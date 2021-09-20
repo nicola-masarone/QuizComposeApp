@@ -60,12 +60,15 @@ class QuizViewModel: ViewModel() {
     val downloadText: LiveData<String> = _downloadText
 
     enum class QuizSubject {
-        FLAGS, DOGS
+        FLAGS, DOGS, NONE
     }
-    private val _selectedSubject = MutableLiveData(QuizSubject.FLAGS)
+    private val _selectedSubject = MutableLiveData(QuizSubject.NONE)
     val selectedSubject : LiveData<QuizSubject> = _selectedSubject
     fun setSelectedSubject (subject: QuizSubject) {
-        _selectedSubject.value = subject
+        if (subject!=_selectedSubject.value) {
+            _selectedSubject.value = subject
+            download()
+        }
     }
 
     fun download() {

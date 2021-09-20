@@ -29,7 +29,7 @@ fun SelectSubject( myViewModel: QuizViewModel = QuizViewModel(), navigateToDesti
     val downLoadText: String by myViewModel.downloadText.observeAsState("")
     val downLoadCompleted: Boolean by myViewModel.downLoadCompleted.observeAsState(false)
     val subjectSelection: QuizViewModel.QuizSubject by myViewModel.selectedSubject.observeAsState(
-        initial = QuizViewModel.QuizSubject.FLAGS
+        initial = QuizViewModel.QuizSubject.NONE
     )
 
     Column {
@@ -41,21 +41,17 @@ fun SelectSubject( myViewModel: QuizViewModel = QuizViewModel(), navigateToDesti
         )
 
         Text(
-            fontSize = 20.sp,
+            fontSize = 16.sp,
             text =
                 """
                 Benvenuti nell'app Quiz.
-                Potete scegliere vari argomenti tra quelli elencati.
-                Per avviare il quiz:
-                1) selezionare un argomento nella lista
-                2) premere il tasto per scaricare i dati
-                3) premere il tasto per andare al quiz.
-                In qualsiasi momento potrete tornare qui per cambiare argomento e continuare il quiz con altre domande.
+                Selezionate un argomento tra quelli elencati
+                per andare al quiz.
                 Buon divertimento!
                 """.trimIndent(),
             modifier = Modifier
                 .padding(10.dp)
-                .weight(2F)
+                .weight(3F)
         )
 
         Box(modifier = Modifier.weight(2F)) {
@@ -65,22 +61,12 @@ fun SelectSubject( myViewModel: QuizViewModel = QuizViewModel(), navigateToDesti
             )
         }
 
-        Column {
-            Button(
-                enabled = true,
-                onClick = { myViewModel.download() },
-                modifier = Modifier.padding(5.dp)
-            ) {
-                Text(text = "Scarica i dati")
-            }
-
-            Button(
-                enabled = downLoadCompleted,
-                onClick = { navigateToDestination("showQuestionCard") },
-                modifier = Modifier.padding(5.dp)
-            ) {
-                Text(text = "Vai al quiz")
-            }
+        Button(
+            enabled = downLoadCompleted,
+            onClick = { navigateToDestination("showQuestionCard") },
+            modifier = Modifier.padding(5.dp)
+        ) {
+            Text(text = "Vai al quiz")
         }
 
     }
@@ -124,7 +110,8 @@ fun MessageRow(
             painter = when (subject) {
                 QuizViewModel.QuizSubject.FLAGS -> painterResource(id = R.drawable.globe_with_the_flags)
                 QuizViewModel.QuizSubject.DOGS -> painterResource(id = R.drawable.puppy)
-            }!!,
+                else -> painterResource(id = R.drawable.man_with_question_mark)
+            },
             contentDescription = "Subject image",
             modifier = Modifier
                 .padding(horizontal = 10.dp)
@@ -137,12 +124,13 @@ fun MessageRow(
             text = when (subject) {
                 QuizViewModel.QuizSubject.FLAGS -> "Bandiere del mondo"
                 QuizViewModel.QuizSubject.DOGS -> "Razze canine"
+                else -> ""
             },
 
             modifier = Modifier
                 .weight(5F)
                 .align(Alignment.CenterVertically),
-            fontSize = 20.sp,
+            fontSize = 14.sp,
             fontWeight = if (subject == selectedSubject) FontWeight.Bold else FontWeight.Normal
         )
     }
